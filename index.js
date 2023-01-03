@@ -15,7 +15,8 @@ let timerId = null
 let dateNow = moment();
 
 function timerStart () {
-    timerDeadline = inputDate.value
+    const localdate = localStorage.setItem('date', inputDate.value);
+    timerDeadline = inputDate.value;
 
     if (inputDate.value === '') {
         alert('Пожалуйста введите дату');
@@ -23,18 +24,19 @@ function timerStart () {
     }
 
     if (moment(timerDeadline).diff(dateNow) <= 0) {
-        inputDate.value = ''
+        inputDate.value = '';
         alert('Дата прошла! Введите более позднюю дату!');
         return; 
     }
 
+    countDown();
     timerId = setInterval(countDown, 1000);
     titleChange();
     newScreen();
 }
 
 function countDown () {
-    dateNow = moment() 
+    dateNow = moment(); 
 
     if (moment(timerDeadline).diff(dateNow) <= 0) {
         clearInterval(timerId);
@@ -51,6 +53,7 @@ function countDown () {
 
 function titleChange () {
     const newTitle = `${inputTitleText.value} (${moment(timerDeadline).format('DD.MM.YYYY')})`;
+    const localTitle = localStorage.setItem('title', newTitle);
     mainTitle.innerHTML = newTitle;
 }
 
@@ -67,11 +70,31 @@ function timerReset() {
     buttonStart.classList.remove('hide');
     buttonReset.classList.add('hide');
 
-    mainTitle.innerHTML = 'Создать новый таймер обратного отсчета'
-    inputTitleText.value = ''
-    inputDate.value = ''
+    mainTitle.innerHTML = 'Создать новый таймер обратного отсчета';
+    inputTitleText.value = '';
+    inputDate.value = '';
     clearInterval(timerId);
+    
+    localStorage.removeItem('title');
+    localStorage.removeItem('date');
 }
+
+const localStorageCheck = () => {
+    const localdate = localStorage.getItem('date')
+    const localTitle = localStorage.getItem('title')
+
+    if (!localdate && !localTitle) {
+        return;
+    } else {
+        timerDeadline = localdate
+        mainTitle.textContent = localTitle
+
+        timerId = setInterval(countDown, 1000);
+        newScreen();
+    }
+}
+
+localStorageCheck();
 
 buttonStart.addEventListener('click', timerStart);
 buttonReset.addEventListener('click', timerReset);
